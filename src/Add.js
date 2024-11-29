@@ -12,23 +12,49 @@ function Add() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  // const handleSubmit = (event) => {
+  //   event.preventDefault();
 
+  //   if (!data.name || !data.email || !data.phone || !data.address) {
+  //     alert("Please fill in all fields");
+  //     return;
+  //   }
+
+  //   axios
+  //     .post("http://localhost:3000/users", data)
+  //     .then((res) => {
+  //       console.log("User added successfully:", res.data);
+  //       navigate("/");
+  //     })
+  //     .catch((err) => console.error("Error adding user:", err));
+  // };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+  
     if (!data.name || !data.email || !data.phone || !data.address) {
       alert("Please fill in all fields");
       return;
     }
-
-    axios
-      .post("http://localhost:3000/users", data)
-      .then((res) => {
-        console.log("User added successfully:", res.data);
-        navigate("/");
-      })
-      .catch((err) => console.error("Error adding user:", err));
+  
+    try {
+      // Fetch existing users to find the current maximum ID
+      const response = await axios.get("http://localhost:3000/users");
+      const users = response.data;
+  
+      // Find the highest ID and increment it
+      const maxId = users.length > 0 ? Math.max(...users.map((user) => Number(user.id))) : 0;
+      const newUserData = { ...data, id: (maxId + 1).toString() };
+  
+      // Add the new user with the next ID
+      await axios.post("http://localhost:3000/users", newUserData);
+  
+      console.log("User added successfully");
+      navigate("/");
+    } catch (err) {
+      console.error("Error adding user:", err);
+    }
   };
-
+  
   return (
     <div
       className="d-flex w-100 justify-content-center align-items-center bg-light"
